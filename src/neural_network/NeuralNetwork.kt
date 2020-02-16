@@ -4,7 +4,7 @@ import matrix.*
 
 class NeuralNetwork(
     private vararg val nodesCountVector: Int,
-    private val learningRate: Double = 0.1,
+    private val learningRate: Double = 0.5,
     private val activationFunction: (Double) -> Double = ActivationFunctions::sigmoid
 ) {
     private val weightMatricesVector: ArrayList<Matrix> = arrayListOf()
@@ -15,12 +15,12 @@ class NeuralNetwork(
     }
 
     fun query(inputMatrix: Matrix): Matrix {
-        val input = !inputMatrix
+        val input = inputMatrix.T
         val history = historyQuery(input)
-        header("Output history")
-        for (output in history) {
-            output.print()
-        }
+//        header("Output history")
+//        for (output in history) {
+//            output.print()
+//        }
         return history[layersCount]
     }
 
@@ -28,7 +28,7 @@ class NeuralNetwork(
         var lastInput = input
         val history = arrayListOf(lastInput)
         for (i in 0 until layersCount) {
-            lastInput = weightMatricesVector[i].dot(lastInput).forEach(activationFunction)
+            lastInput = (Matrix.dot(weightMatricesVector[i], lastInput)).forEach(activationFunction)
             history.add(lastInput)
         }
         return history
@@ -41,7 +41,7 @@ class NeuralNetwork(
         val outputHistory = historyQuery(input)
         var errors = Matrix.empty()
         for (layerNumber in layersCount downTo 1) {
-            header("Offset [$layerNumber]")
+//            header("Offset [$layerNumber]")
             errors = if (layerNumber == layersCount) {
                 target - outputHistory[layerNumber]
             } else {
@@ -51,7 +51,7 @@ class NeuralNetwork(
             val f1 = Matrix.dot(f0, outputHistory[layerNumber-1].T)
             val offset = learningRate * f1
             weightMatricesVector[layerNumber-1] += offset
-            offset.print()
+//            offset.print()
         }
     }
 

@@ -1,19 +1,33 @@
-import matrix.Matrix
+import csv.CSVReader
 import neural_network.NeuralNetwork
-import matrix.Row as R
+import utils.PersonConverter
+import java.io.File
+
+val fileTest = "test.csv"
+val fileTrain = "heart_train.csv"
+val fileCheck = "heart_check.csv"
+val fileFull = "heart_full.csv"
+val folder = "csv" + File.separator
 
 fun main() {
-    val inputCount = 784
-    val hiddenCount = 200
-    val outputCount = 10
+    val trainReader = CSVReader(folder + fileTrain)
+    val checkReader = CSVReader(folder + fileCheck)
 
-    val network = NeuralNetwork(3, 5, 3)
-    network.query(Matrix(1, 3, 0.35, 0.22, 0.1))
-    network.printMatricesWeightVector()
-    network.train(
-        Matrix(R(0.35, 0.22, 0.1)),
-        Matrix(R(0.6, 0.366, 0.19))
-    )
-    network.printMatricesWeightVector()
+    val network = NeuralNetwork(13, 100, 1)
+    trainReader.forEach {
+        val (input, target) = PersonConverter.personIntoNormalMatrix(it)
+        network.train(input, target)
+    }
+    var counter = 0
+    var right = 0
+    checkReader.forEach {
+        val (input, target) = PersonConverter.personIntoNormalMatrix(it)
+        val result = network.query(input)
+        val queryResult = if (result[0,0] > 0.5) 1.0 else 0.0
+        if (queryResult == target[0,0]) right++
+        counter++
+    }
+    println("Right: $right")
+    println("Counter $counter")
 }
 
